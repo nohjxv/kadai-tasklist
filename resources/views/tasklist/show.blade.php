@@ -20,7 +20,7 @@
     </table>
 
     {{-- メッセージ編集ページへのリンク --}}
-    {!! link_to_route('tasklist.edit', 'このメッセージを編集', ['tasklist' => $tasklist->id], ['class' => 'btn btn-light']) !!}
+    {!! link_to_route('tasklist.edit', 'このタスクを編集', ['tasklist' => $tasklist->id], ['class' => 'btn btn-light']) !!}
 
     {{-- メッセージ削除フォーム --}}
     {!! Form::model($tasklist, ['route' => ['tasklist.destroy', $tasklist->id], 'method' => 'delete']) !!}
@@ -28,3 +28,5 @@
     {!! Form::close() !!}
 
 @endsection
+
+
