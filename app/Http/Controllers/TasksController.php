@@ -14,13 +14,17 @@ class TasksController extends Controller
      */
     public function index()
     {
-        // メッセージ一覧を取得
-        $tasklist = Task::all();
+        $tasklist = [];
+        if (\Auth::check()) { // 認証済みの場合
+            // 認証済みユーザを取得
+            $user = \Auth::user();
+            $tasklist = $user->tasks()->get();
+        }
 
-        // メッセージ一覧ビューでそれを表示
         return view('tasklist.index', [
             'tasklist' => $tasklist,
         ]);
+
     }
 
     /**
@@ -53,10 +57,12 @@ class TasksController extends Controller
             'content' => 'required|max:255',
         ]);
 
+        //$user = $user = \Auth::user();
         // メッセージを作成
         $tasklist = new Task;
         $tasklist->status = $request->status;    // 追加
         $tasklist->content = $request->content;
+        $tasklist->user_id = \Auth::id();
         $tasklist->save();
 
         // トップページへリダイレクトさせる
@@ -74,11 +80,16 @@ class TasksController extends Controller
     {
         // idの値でメッセージを検索して取得
         $tasklist = Task::findOrFail($id);
+        if (\Auth::id() === $tasklist->user_id) {
+            // メッセージ詳細ビューでそれを表示
+            return view('tasklist.show', [
+                'tasklist' => $tasklist,
+            ]);
+        }
+        
+        return redirect('/');
 
-        // メッセージ詳細ビューでそれを表示
-        return view('tasklist.show', [
-            'tasklist' => $tasklist,
-        ]);
+        
     }
 
     /**
@@ -91,11 +102,15 @@ class TasksController extends Controller
     {
         // idの値でメッセージを検索して取得
         $tasklist = Task::findOrFail($id);
-
-        // メッセージ編集ビューでそれを表示
-        return view('tasklist.edit', [
-            'tasklist' => $tasklist,
-        ]);
+        if (\Auth::id() === $tasklist->user_id) {
+            // メッセージ編集ビューでそれを表示
+            return view('tasklist.edit', [
+                'tasklist' => $tasklist,
+            ]);
+        }
+        
+        return redirect('/');
+        
     }
     /**
      * Update the specified resource in storage.
@@ -112,13 +127,17 @@ class TasksController extends Controller
             'status' => 'required|max:10',   // 追加
             'content' => 'required|max:255',
         ]);
-        
+
         // idの値でメッセージを検索して取得
         $tasklist = Task::findOrFail($id);
-        // メッセージを更新
-        $tasklist->status = $request->status;
-        $tasklist->content = $request->content;
-        $tasklist->save();
+        if (\Auth::id() === $tasklist->user_id) {
+            
+            // メッセージを更新
+            $tasklist->status = $request->status;
+            $tasklist->content = $request->content;
+            $tasklist->save();
+
+        }
 
         // トップページへリダイレクトさせる
         return redirect('/');
@@ -134,8 +153,11 @@ class TasksController extends Controller
     {
         // idの値でメッセージを検索して取得
         $tasklist = Task::findOrFail($id);
-        // メッセージを削除
-        $tasklist->delete();
+        
+        if (\Auth::id() === $tasklist->user_id) {
+            // メッセージを削除
+            $tasklist->delete();
+        }
 
         // トップページへリダイレクトさせる
         return redirect('/');
