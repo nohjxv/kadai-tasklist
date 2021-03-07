@@ -35,11 +35,14 @@ class TasksController extends Controller
     public function create()
     {
         $tasklist = new Task;
-
-        // メッセージ作成ビューを表示
-        return view('tasklist.create', [
-            'tasklist' => $tasklist,
-        ]);
+        if (\Auth::check()) {
+            // メッセージ作成ビューを表示
+            return view('tasklist.create', [
+                'tasklist' => $tasklist,
+            ]);
+        }
+        
+        return redirect('/');
     }
     /**
      * Store a newly created resource in storage.
@@ -56,14 +59,14 @@ class TasksController extends Controller
             'status' => 'required|max:10',   // 追加
             'content' => 'required|max:255',
         ]);
-
-        //$user = $user = \Auth::user();
-        // メッセージを作成
-        $tasklist = new Task;
-        $tasklist->status = $request->status;    // 追加
-        $tasklist->content = $request->content;
-        $tasklist->user_id = \Auth::id();
-        $tasklist->save();
+        if (\Auth::check()) {
+            // メッセージを作成
+            $tasklist = new Task;
+            $tasklist->status = $request->status;    // 追加
+            $tasklist->content = $request->content;
+            $tasklist->user_id = \Auth::id();
+            $tasklist->save();
+        }
 
         // トップページへリダイレクトさせる
         return redirect('/');
